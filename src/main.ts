@@ -5,10 +5,13 @@ import { Bulett } from "./Bulett";
 
 export let wave: number = 0;
 let enemys: Enemy[] = [];
+let towers: Tower[] = [];
 let coins: number = 1000;
 let spawnInterval: number;
 let health: number = 3;
 let buildmode: boolean = false;
+let upgrademode: boolean = false;
+let destroymode: boolean = false;
 
 const startBTN: HTMLDivElement = document.querySelector(
 	".startBTN",
@@ -16,6 +19,7 @@ const startBTN: HTMLDivElement = document.querySelector(
 const coinSpan: HTMLSpanElement = document.querySelector(
 	".coinSpan",
 ) as HTMLSpanElement;
+coinSpan.innerHTML = coins.toString();
 const portalLeft = window.getComputedStyle(
 	document.querySelector(".endportal") as HTMLDivElement,
 ).left;
@@ -25,17 +29,22 @@ const buildmodediv: HTMLDivElement = document.querySelector(
 const constructiondiv: HTMLDivElement = document.querySelector(
 	".constructionsdiv",
 ) as HTMLDivElement;
+const upgradediv: HTMLDivElement = document.querySelector(
+	".upgradediv",
+) as HTMLDivElement;
+const destroydiv: HTMLDivElement = document.querySelector(
+	".destroydiv",
+) as HTMLDivElement;
+const towrselecterdiv: HTMLDivElement = document.querySelector(
+	".towerSeletor",
+) as HTMLDivElement;
+const cells = document.querySelectorAll(
+	"td",
+) as NodeListOf<HTMLTableCellElement>;
+const selectableTowers = document.querySelectorAll(
+	".towerselectdiv",
+) as NodeListOf<HTMLTableCellElement>;
 
-buildmodediv.addEventListener("click", () => {
-	if (buildmode) {
-		buildmode = false;
-		constructiondiv.style.opacity = "0";
-	} else {
-		buildmode = true;
-		constructiondiv.style.opacity = "1";
-	}
-});
-coinSpan.innerHTML = coins.toString();
 startBTN.addEventListener("click", () => {
 	WaveStarted();
 	(document.querySelector(".startportal") as HTMLDivElement).style.opacity =
@@ -43,6 +52,30 @@ startBTN.addEventListener("click", () => {
 	(document.querySelector(".endportal") as HTMLDivElement).style.opacity = "1";
 	startBTN.style.display = "none";
 });
+
+cells.forEach((c) => {
+	c.addEventListener("click", () => {
+		if (buildmode && !c.classList.contains("occupied")) {
+			c.classList.add("occupied");
+			let type: string = (
+				document.querySelector(".selelectedturet p") as HTMLDivElement
+			).innerHTML;
+			let newtower: Tower = new Tower(type, (t: Tower) => LevelUp(t), c);
+			coins -= newtower.Cost;
+			alert(coins);
+			coinSpan.innerHTML = coins.toString();
+			towers.push(newtower);
+		}
+	});
+});
+
+function LevelUp(t: Tower): void {
+	if (upgrademode && t.Upgradecost <= coins) {
+		t.Level++;
+		coins -= t.Upgradecost;
+		coinSpan.innerHTML = coins.toString();
+	}
+}
 
 function WaveStarted(): void {
 	wave++;
@@ -97,3 +130,72 @@ function RemoveHart(): void {
 function GameOver(): void {
 	clearInterval(spawnInterval);
 }
+
+buildmodediv.addEventListener("click", () => {
+	upgrademode = false;
+	upgradediv.style.backgroundColor = "transparent";
+	destroymode = false;
+	destroydiv.style.backgroundColor = "transparent";
+	if (buildmode) {
+		buildmode = false;
+		towrselecterdiv.style.display = "none";
+		constructiondiv.style.opacity = "0";
+		cells.forEach((c) => {
+			c.style.border = "2px transparent solid";
+		});
+	} else {
+		buildmode = true;
+		towrselecterdiv.style.display = "flex";
+		constructiondiv.style.opacity = "1";
+		cells.forEach((c) => {
+			c.style.border = "2px orange solid";
+		});
+	}
+});
+
+upgradediv.addEventListener("click", () => {
+	buildmode = false;
+	towrselecterdiv.style.display = "none";
+	constructiondiv.style.opacity = "0";
+	destroymode = false;
+	destroydiv.style.backgroundColor = "transparent";
+	cells.forEach((c) => {
+		c.style.border = "2px transparent solid";
+	});
+
+	if (upgrademode) {
+		upgrademode = false;
+		upgradediv.style.backgroundColor = "transparent";
+	} else {
+		upgrademode = true;
+		upgradediv.style.backgroundColor = "green";
+	}
+});
+
+destroydiv.addEventListener("click", () => {
+	buildmode = false;
+	towrselecterdiv.style.display = "none";
+	constructiondiv.style.opacity = "0";
+	upgrademode = false;
+	upgradediv.style.backgroundColor = "transparent";
+	cells.forEach((c) => {
+		c.style.border = "2px transparent solid";
+	});
+
+	if (destroymode) {
+		destroymode = false;
+		destroydiv.style.backgroundColor = "transparent";
+	} else {
+		destroymode = true;
+		destroydiv.style.backgroundColor = "orange";
+	}
+});
+
+selectableTowers.forEach((s) => {
+	s.addEventListener("click", () => {
+		selectableTowers.forEach((t) => {
+			t.classList.remove("selelectedturet");
+		});
+		s.classList.add("selelectedturet");
+	});
+});
