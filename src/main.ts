@@ -6,7 +6,7 @@ import { Bulett } from "./Bulett";
 export let wave: number = 0;
 let enemys: Enemy[] = [];
 let towers: Tower[] = [];
-let coins: number = 1000;
+let coins: number = 10000;
 let spawnInterval: number;
 let health: number = 3;
 let buildmode: boolean = false;
@@ -56,24 +56,50 @@ startBTN.addEventListener("click", () => {
 cells.forEach((c) => {
 	c.addEventListener("click", () => {
 		if (buildmode && !c.classList.contains("occupied")) {
-			c.classList.add("occupied");
 			let type: string = (
 				document.querySelector(".selelectedturet p") as HTMLDivElement
 			).innerHTML;
-			let newtower: Tower = new Tower(type, (t: Tower) => LevelUp(t), c);
-			coins -= newtower.Cost;
-			alert(coins);
-			coinSpan.innerHTML = coins.toString();
-			towers.push(newtower);
+			let newtower: Tower = new Tower(
+				type,
+				coins,
+				(t: Tower) => Demolish(t),
+				(t: Tower) => LevelUp(t),
+				c,
+			);
+			if (coins >= newtower.Cost) {
+				c.classList.add("occupied");
+				coins -= newtower.Cost;
+				coinSpan.innerHTML = coins.toString();
+				towers.push(newtower);
+			}
 		}
 	});
 });
 
 function LevelUp(t: Tower): void {
-	if (upgrademode && t.Upgradecost <= coins) {
+	console.log(t);
+	const upgradeCost = t.Upgradecost;
+	if (upgrademode && upgradeCost <= coins) {
+		coins -= upgradeCost;
 		t.Level++;
-		coins -= t.Upgradecost;
 		coinSpan.innerHTML = coins.toString();
+	}
+}
+
+function Demolish(t: Tower): void {
+	if (destroymode) {
+		let moneyback: number = t.Cost;
+		if (t.Level > 1) {
+			moneyback +=
+				t.DefaultUpgradeCost * 2 ** (t.Level - 1) - t.DefaultUpgradeCost;
+		}
+		coins += moneyback;
+		coinSpan.innerHTML = coins.toString();
+		const index = towers.indexOf(t);
+		if (index !== -1) {
+			towers.splice(index, 1);
+		}
+		t.Demolish();
 	}
 }
 
@@ -111,7 +137,7 @@ function EnemySpawner(): void {
 	for (let i = 0; i < amountToSpawn; i++) {
 		setTimeout(
 			() => {
-				enemys.push(new Enemy((e: Enemy) => Killed(e)));
+				enemys.push(new Enemy((e: Enemy) => Killed(e), wave));
 			},
 			i * (800 / 1.2 ** (wave - 1)),
 		);
