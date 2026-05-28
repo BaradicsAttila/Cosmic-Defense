@@ -20,7 +20,9 @@ export class Enemy {
 		});
 		document.querySelector(".gameArea")?.appendChild(this.EnemyDiv);
 		this.EnemyDiv.style.left = "150px";
-		this.EnemyDiv.style.opacity = "1";
+		requestAnimationFrame(() => {
+			this.EnemyDiv.style.opacity = "1";
+		});
 	}
 
 	SetAttributes(): void {
@@ -59,11 +61,11 @@ export class Enemy {
 	}
 
 	Destroy(): void {
-		document.querySelector("#gameArea")?.removeChild(this.EnemyDiv);
+		document.querySelector(".gameArea")?.removeChild(this.EnemyDiv);
 	}
 
 	Move(): void {
 		let position: number = Number(this.EnemyDiv.style.left.replace("px", ""));
-		this.EnemyDiv.style.left = (position += 1 * this.Speed).toString() + "px";
+		this.EnemyDiv.style.left = (position += 3 * this.Speed).toString() + "px";
 	}
 }
