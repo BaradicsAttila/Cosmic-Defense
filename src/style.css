@@ -111,16 +111,39 @@ body {
 	margin: 10px;
 }
 
-.blaster div {
+.blasterdiv div {
 	background-image: url(assets/BlasterTuret.png);
 }
 
-.shock div {
+.shockdiv div {
 	background-image: url(assets/ShockTuret.png);
 }
 
-.sniper div {
+.sniperdiv div {
 	background-image: url(assets/SniperTuret.png);
+}
+
+.bulett {
+	position: absolute;
+	background-size: contain;
+}
+
+.Blaster {
+	width: 40px;
+	height: 40px;
+	background-image: url(assets/BulettBlaster.gif);
+}
+
+.Shock {
+	width: 400px;
+	height: 400px;
+	opacity: 0.5;
+	background-image: url(assets/BulettShock.gif);
+}
+
+.Sniper {
+	background-image: url(assets/BulettSniper.gif);
+	width: 20px;
 }
 
 .selelectedturet {
@@ -228,16 +251,37 @@ body {
 	background-size: contain;
 }
 
+.hpdiv {
+	position: absolute;
+	height: 3px;
+	width: 40px;
+	background-color: red;
+	bottom: -5px;
+	left: 10px;
+}
+
 .tower {
+	position: relative;
 	width: 100%;
 	height: 100%;
-	background-size: cover;
+	background-size: 90%;
+	background-repeat: no-repeat;
+	background-position: top;
 	z-index: 7;
+	color: white;
+	font-weight: bold;
+}
+
+.tower span {
+	position: absolute;
+	bottom: 3px;
+	left: 50%;
+	translate: -50%;
 }
 
 table {
 	position: absolute;
-	width: 1000px;
+	width: 1036px;
 	height: auto;
 	left: 50%;
 	translate: -50%;

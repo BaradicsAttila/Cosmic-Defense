@@ -2,9 +2,11 @@ export class Enemy {
 	callback: Function;
 	Type!: string;
 	Hp!: number;
+	MaxHp!: number;
 	Speed!: number;
 	Reward!: number;
 	EnemyDiv: HTMLDivElement;
+	HpDiv: HTMLDivElement;
 	wave: number;
 
 	constructor(callBackDied: Function, wave: number) {
@@ -18,10 +20,15 @@ export class Enemy {
 		this.EnemyDiv.addEventListener("click", () => {
 			this.TakeDamage(2);
 		});
-		document.querySelector(".gameArea")?.appendChild(this.EnemyDiv);
 		this.EnemyDiv.style.left = "150px";
+		this.HpDiv = document.createElement("div");
+		this.HpDiv.classList.add("hpdiv");
+		document.querySelector(".gameArea")?.appendChild(this.EnemyDiv);
+		this.EnemyDiv.appendChild(this.HpDiv)
 		requestAnimationFrame(() => {
-			this.EnemyDiv.style.opacity = "1";
+			requestAnimationFrame(() => {
+				this.EnemyDiv.style.opacity = "1";
+			});
 		});
 	}
 
@@ -37,24 +44,29 @@ export class Enemy {
 		if (this.Type === "Red") {
 			this.Speed = 1 * 1.1 ** (this.wave - 1);
 			this.Hp = 200 * 1.3 ** (this.wave - 1);
+			this.MaxHp = 200 * 1.3 ** (this.wave - 1);
 			this.Reward = 300 * 1.1 ** (this.wave - 1);
 		} else if (this.Type === "Yellow") {
 			this.Speed = 2 * 1.1 ** (this.wave - 1);
 			this.Hp = 50 * 1.3 ** (this.wave - 1);
+			this.MaxHp = 50 * 1.3 ** (this.wave - 1);
 			this.Reward = 200 * 1.1 ** (this.wave - 1);
 		} else if (this.Type === "Green") {
 			this.Speed = 0.5 * 1.1 ** (this.wave - 1);
 			this.Hp = 200 * 1.3 ** (this.wave - 1);
+			this.MaxHp = 200 * 1.3 ** (this.wave - 1);
 			this.Reward = 150 * 1.1 ** (this.wave - 1);
 		} else {
 			this.Speed = 1 * 1.1 ** (this.wave - 1);
 			this.Hp = 100 * 1.3 ** (this.wave - 1);
+			this.MaxHp = 100 * 1.3 ** (this.wave - 1);
 			this.Reward = 100 * 1.1 ** (this.wave - 1);
 		}
 	}
 
 	TakeDamage(amount: number): void {
 		this.Hp -= amount;
+		this.HpDiv.style.width = (this.Hp/this.MaxHp*40).toString()+"px"
 		if (this.Hp <= 0) {
 			if (this.callback) this.callback(this);
 		}

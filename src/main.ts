@@ -3,11 +3,15 @@ import { Enemy } from "./Enemy";
 import { Tower } from "./Tower";
 import { Bulett } from "./Bulett";
 
-export let wave: number = 0;
+let wave: number = 0;
 let enemys: Enemy[] = [];
 let towers: Tower[] = [];
+let blasterbuletts: Bulett[] = [];
 let coins: number = 10000;
-let spawnInterval: number;
+let gameInterval: number;
+let blasterInterval: number;
+let shockInterval: number;
+let sniperInterval: number;
 let health: number = 3;
 let buildmode: boolean = false;
 let upgrademode: boolean = false;
@@ -44,6 +48,9 @@ const cells = document.querySelectorAll(
 const selectableTowers = document.querySelectorAll(
 	".towerselectdiv",
 ) as NodeListOf<HTMLTableCellElement>;
+const gameArea: HTMLDivElement = document.querySelector(
+	".gameArea",
+) as HTMLDivElement;
 
 startBTN.addEventListener("click", () => {
 	WaveStarted();
@@ -51,7 +58,86 @@ startBTN.addEventListener("click", () => {
 		"1";
 	(document.querySelector(".endportal") as HTMLDivElement).style.opacity = "1";
 	startBTN.style.display = "none";
+	startBTN.innerHTML = "Start Next Wave";
 });
+
+function WaveStarted(): void {
+	wave++;
+	EnemySpawner();
+	blasterInterval = setInterval(() => {
+		Bulettspawner("Blaster");
+	}, 1000);
+
+	gameInterval = setInterval(() => {
+		enemys.forEach((e) => {
+			e.Move();
+			if (
+				Number(e.EnemyDiv.style.left.replace("px", "")) >=
+				Number(portalLeft.replace("px", ""))
+			) {
+				let index: number = enemys.indexOf(e);
+				enemys.splice(index, 1);
+				e.Destroy();
+				RemoveHart();
+			}
+		});
+		blasterbuletts.forEach((b) => {
+			let bx: number = parseInt(b.Bulettdiv.style.left);
+			let by: number = parseInt(b.Bulettdiv.style.top);
+			let targetable: Enemy[] = [];
+			enemys.forEach((e) => {
+				let ex: number = parseInt(e.EnemyDiv.style.left);
+				let ey = parseInt(getComputedStyle(e.EnemyDiv).top);
+				console.log(by);
+				let distance: number = Math.sqrt((ex - bx) ** 2 + (ey - by) ** 2);
+				console.log(distance);
+				if (distance < b.Range) {
+					targetable.push(e);
+				}
+			});
+			if (targetable.length > 0) {
+				let targeted: Enemy = targetable[0];
+				targetable.forEach((t) => {
+					if (
+						parseInt(targeted.EnemyDiv.style.left) <
+						parseInt(t.EnemyDiv.style.left)
+					) {
+						targeted = t;
+					}
+				});
+				let tx: number = parseInt(targeted.EnemyDiv.style.left);
+				let ty: number = parseInt(targeted.EnemyDiv.style.bottom);
+				b.Bulettdiv.style.left = (Math.abs(tx - bx) / 10).toString() + "px";
+				b.Bulettdiv.style.bottom = ((ty - by) ** 2 / 10).toString() + "px";
+			}
+		});
+	}, 16);
+}
+
+function Bulettspawner(towertype: string) {
+	towers.forEach((t) => {
+		let inrange: boolean = false;
+		let towerRect: DOMRect = t.Towerdiv.getBoundingClientRect();
+		let tx: number = towerRect.left;
+		let ty: number = towerRect.top;
+		enemys.forEach((e) => {
+			let enemyRect: DOMRect = e.EnemyDiv.getBoundingClientRect();
+			let ex: number = enemyRect.left;
+			let ey: number = enemyRect.top;
+			let distance: number = Math.sqrt((ex - tx) ** 2 + (ey - ty) ** 2);
+			if (distance < t.Range) {
+				inrange = true;
+			}
+		});
+		if (t.Type == towertype && inrange) {
+			let bulett: Bulett = new Bulett(t.Type, t.Damage, t.Range);
+			bulett.Bulettdiv.style.left = (tx + 20).toString() + "px";
+			bulett.Bulettdiv.style.top = (ty - 80).toString() + "px";
+			gameArea.appendChild(bulett.Bulettdiv);
+			blasterbuletts.push(bulett);
+		}
+	});
+}
 
 cells.forEach((c) => {
 	c.addEventListener("click", () => {
@@ -77,11 +163,11 @@ cells.forEach((c) => {
 });
 
 function LevelUp(t: Tower): void {
-	console.log(t);
 	const upgradeCost = t.Upgradecost;
 	if (upgrademode && upgradeCost <= coins) {
 		coins -= upgradeCost;
 		t.Level++;
+
 		coinSpan.innerHTML = coins.toString();
 	}
 }
@@ -101,27 +187,6 @@ function Demolish(t: Tower): void {
 		}
 		t.Demolish();
 	}
-}
-
-function WaveStarted(): void {
-	wave++;
-	EnemySpawner();
-	spawnInterval = setInterval(() => {
-		enemys.forEach((e) => {
-			e.Move();
-			console.log("asdsad");
-			if (
-				Number(e.EnemyDiv.style.left.replace("px", "")) >=
-				Number(portalLeft.replace("px", ""))
-			) {
-				let index: number = enemys.indexOf(e);
-				enemys.splice(index, 1);
-
-				e.Destroy();
-				RemoveHart();
-			}
-		});
-	}, 16);
 }
 
 function Killed(e: Enemy): void {
@@ -154,7 +219,7 @@ function RemoveHart(): void {
 }
 
 function GameOver(): void {
-	clearInterval(spawnInterval);
+	clearInterval(gameInterval);
 }
 
 buildmodediv.addEventListener("click", () => {

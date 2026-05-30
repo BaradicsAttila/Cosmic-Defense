@@ -3,8 +3,9 @@ export class Tower {
 	Towerdiv: HTMLDivElement;
 	Level: number;
 	Stats: number[];
-    Placement:HTMLTableCellElement;
+	Placement: HTMLTableCellElement;
 	Cost: number;
+	Range:number;
 	DefaultUpgradeCost: number;
 	get Damage(): number {
 		return this.Stats[0] * 1.5 ** (this.Level - 1);
@@ -27,8 +28,9 @@ export class Tower {
 		this.Level = 1;
 		this.Stats = this.GetLevelMultiplier();
 		this.Cost = this.Stats[2];
+		this.Range = this.Stats[4]
 		this.DefaultUpgradeCost = this.Stats[3];
-        this.Placement = placement;
+		this.Placement = placement;
 		this.Towerdiv = document.createElement("div");
 		if (coinamount >= this.Cost) {
 			this.Towerdiv.classList.add("tower");
@@ -36,11 +38,13 @@ export class Tower {
 			this.Towerdiv.addEventListener("click", () => {
 				if (callbackupgrade) {
 					callbackupgrade(this);
+					this.Towerdiv.innerHTML = "<span>Lvl: " + this.Level.toString()+"</span>";
 				}
 				if (calbackdemolish) {
 					calbackdemolish(this);
 				}
 			});
+			this.Towerdiv.innerHTML = "<span>Lvl: " + this.Level.toString()+"</span>";
 			placement.appendChild(this.Towerdiv);
 		}
 	}
@@ -49,13 +53,13 @@ export class Tower {
 		let stats: number[];
 		switch (this.Type) {
 			case "Blaster":
-				stats = [20, 500, 200, 200];
+				stats = [20, 500, 200, 200, 600];
 				return stats;
 			case "Shock":
-				stats = [10, 200, 500, 400];
+				stats = [10, 1000, 500, 400, 400];
 				return stats;
 			case "Sniper":
-				stats = [100, 2000, 1000, 800];
+				stats = [100, 2000, 1000, 800, 1200];
 				return stats;
 
 			default:
@@ -63,7 +67,7 @@ export class Tower {
 		}
 	}
 	Demolish(): void {
-        this.Placement.removeChild(this.Towerdiv)
-        this.Placement.classList.remove("occupied")
-    }
+		this.Placement.removeChild(this.Towerdiv);
+		this.Placement.classList.remove("occupied");
+	}
 }
