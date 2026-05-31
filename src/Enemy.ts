@@ -8,11 +8,9 @@ export class Enemy {
 	EnemyDiv: HTMLDivElement;
 	HpDiv: HTMLDivElement;
 	Wave: number;
-	Distance:number;
 
 	constructor(callBackDied: Function, wave: number) {
 		this.callback = callBackDied;
-		this.Distance = 0;
 		this.Wave = wave;
 		this.SetAttributes();
 		this.EnemyDiv = document.createElement("div");

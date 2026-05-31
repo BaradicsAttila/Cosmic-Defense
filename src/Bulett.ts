@@ -8,8 +8,8 @@ export class Bulett {
 	Target: Enemy | null;
 	Shotfrom: Tower | null;
 
-	constructor(shotfrom:Tower) {
-		this.Shotfrom = shotfrom
+	constructor(shotfrom: Tower) {
+		this.Shotfrom = shotfrom;
 		this.Type = this.Shotfrom.Type;
 		this.Damage = this.Shotfrom.Damage;
 		this.Range = this.Shotfrom.Range;
@@ -17,9 +17,5 @@ export class Bulett {
 		this.Bulettdiv = document.createElement("div");
 		this.Bulettdiv.classList.add("bulett");
 		this.Bulettdiv.classList.add(this.Type);
-	}
-
-	Destroy(): void {
-		document.querySelector(".gameArea")?.removeChild(this.Bulettdiv);
 	}
 }
