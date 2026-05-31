@@ -17,6 +17,7 @@ let iswaverunning: boolean = false;
 let enemysthiswave: number = 0;
 let enemydefeatedthiswave: number = 0;
 let spawnTimeouts: number[] = [];
+let GameEnded: boolean = false;
 
 const startBTN: HTMLButtonElement = document.querySelector(
 	".startBTN",
@@ -66,6 +67,7 @@ startBTN.addEventListener("click", () => {
 		towers.forEach((t) => {
 			t.Demolish();
 		});
+		GameEnded = false;
 		coins = 10000;
 		coinSpan.innerHTML = coins.toString();
 		health = 3;
@@ -73,6 +75,7 @@ startBTN.addEventListener("click", () => {
 			"180px";
 		towers = [];
 		startBTN.innerHTML = "Start First Wave";
+		currentwavespan.innerHTML = wave.toString()
 	} else {
 		WaveStarted();
 		(document.querySelector(".startportal") as HTMLDivElement).style.opacity =
@@ -289,7 +292,7 @@ function Bulettspawner(t: Tower): void {
 }
 cells.forEach((c) => {
 	c.addEventListener("click", () => {
-		if (buildmode && !c.classList.contains("occupied")) {
+		if (buildmode && !c.classList.contains("occupied") && !GameEnded) {
 			let type: string = (
 				document.querySelector(".selelectedturet p") as HTMLDivElement
 			).innerHTML;
@@ -391,6 +394,7 @@ function WaveOver(): void {
 
 function GameOver(): void {
 	if (iswaverunning) {
+		GameEnded = true;
 		iswaverunning = false;
 		spawnTimeouts.forEach((id) => clearTimeout(id));
 		spawnTimeouts = [];
@@ -408,6 +412,16 @@ function GameOver(): void {
 		wave = 0;
 		startBTN.innerHTML = "Restart";
 		startBTN.style.display = "block";
+		upgrademode = false;
+		upgradediv.style.backgroundColor = "";
+		destroymode = false;
+		destroydiv.style.backgroundColor = "";
+		buildmode = false;
+		towrselecterdiv.style.display = "none";
+		constructiondiv.style.opacity = "0";
+		cells.forEach((c) => {
+			c.style.border = "2px transparent solid";
+		});
 	}
 }
 
@@ -421,10 +435,10 @@ function SetRecord(): void {
 }
 buildmodediv.addEventListener("click", () => {
 	upgrademode = false;
-	upgradediv.style.backgroundColor = "transparent";
+	upgradediv.style.backgroundColor = "";
 	destroymode = false;
-	destroydiv.style.backgroundColor = "transparent";
-	if (buildmode) {
+	destroydiv.style.backgroundColor = "";
+	if (buildmode || GameEnded) {
 		buildmode = false;
 		towrselecterdiv.style.display = "none";
 		constructiondiv.style.opacity = "0";
@@ -446,14 +460,14 @@ upgradediv.addEventListener("click", () => {
 	towrselecterdiv.style.display = "none";
 	constructiondiv.style.opacity = "0";
 	destroymode = false;
-	destroydiv.style.backgroundColor = "transparent";
+	destroydiv.style.backgroundColor = "";
 	cells.forEach((c) => {
 		c.style.border = "2px transparent solid";
 	});
 
-	if (upgrademode) {
+	if (upgrademode || GameEnded) {
 		upgrademode = false;
-		upgradediv.style.backgroundColor = "transparent";
+		upgradediv.style.backgroundColor = "";
 	} else {
 		upgrademode = true;
 		upgradediv.style.backgroundColor = "green";
@@ -465,14 +479,14 @@ destroydiv.addEventListener("click", () => {
 	towrselecterdiv.style.display = "none";
 	constructiondiv.style.opacity = "0";
 	upgrademode = false;
-	upgradediv.style.backgroundColor = "transparent";
+	upgradediv.style.backgroundColor = "";
 	cells.forEach((c) => {
 		c.style.border = "2px transparent solid";
 	});
 
-	if (destroymode) {
+	if (destroymode || GameEnded) {
 		destroymode = false;
-		destroydiv.style.backgroundColor = "transparent";
+		destroydiv.style.backgroundColor = "";
 	} else {
 		destroymode = true;
 		destroydiv.style.backgroundColor = "orange";
