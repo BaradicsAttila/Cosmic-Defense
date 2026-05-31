@@ -9,6 +9,8 @@ export class Tower {
 	DefaultUpgradeCost: number;
 	Interval: number;
 	Firerate: number;
+	InRange : boolean;
+	LastShot : number;
 	get Damage(): number {
 		return this.Stats[0] * 1.5 ** (this.Level - 1);
 	}
@@ -32,6 +34,8 @@ export class Tower {
 		this.DefaultUpgradeCost = this.Stats[3];
 		this.Placement = placement;
 		this.Interval = 0;
+		this.InRange = false;
+		this.LastShot = 0;
 		this.Towerdiv = document.createElement("div");
 		if (coinamount >= this.Cost) {
 			this.Towerdiv.classList.add("tower");
@@ -59,7 +63,7 @@ export class Tower {
 				stats = [20, 1000, 200, 200, 400];
 				return stats;
 			case "Shock":
-				stats = [10, 2000, 500, 400, 400];
+				stats = [25, 2000, 500, 400, 400];
 				return stats;
 			case "Sniper":
 				stats = [100, 3000, 1000, 800, 1000];

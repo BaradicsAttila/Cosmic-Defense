@@ -63,6 +63,33 @@ function WaveStarted(): void {
 	wave++;
 	EnemySpawner();
 	gameInterval = setInterval(() => {
+		towers.forEach((t) => {
+			let towerRect = t.Towerdiv.getBoundingClientRect();
+			let nowInRange = false;
+			enemys.forEach((e) => {
+				let er = e.EnemyDiv.getBoundingClientRect();
+				if (
+					Math.sqrt(
+						(er.left - towerRect.left) ** 2 +
+							(er.top - towerRect.top) ** 2,
+					) < t.Range
+				) {
+					nowInRange = true;
+				}
+			});
+			if (nowInRange && !t.InRange) {
+				if (Date.now() - t.LastShot >= t.Firerate) {
+					Bulettspawner(t);
+				}
+				t.Interval = setInterval(() => {
+					Bulettspawner(t);
+				}, t.Firerate);
+			} else if (!nowInRange && t.InRange) {
+				clearInterval(t.Interval);
+				t.Interval = 0;
+			}
+			t.InRange = nowInRange;
+		});
 		let enemiesToRemove: Enemy[] = [];
 		enemys.forEach((e) => {
 			e.Move();
@@ -104,6 +131,10 @@ function WaveStarted(): void {
 							500 * (t.Distance / b.Range),
 						);
 					});
+					bulletsToRemove.push(b);
+				}
+				if (targetable.length == 0) {
+					bulletsToRemove.push(b);
 				}
 				if (targetable.length > 0 && b.Type != "Shock") {
 					let targeted: Enemy = targetable[0];
@@ -127,13 +158,27 @@ function WaveStarted(): void {
 				let dx = tx + 40 - bx;
 				let dy = ty + 10 - by;
 				let distance = Math.sqrt(dx ** 2 + dy ** 2);
-				bx += (dx / distance) * 8;
-				by += (dy / distance) * 8;
-				b.Bulettdiv.style.left = bx.toString() + "px";
-				b.Bulettdiv.style.top = by.toString() + "px";
-				if (distance < 20) {
+				if (b.Type == "Blaster") {
+					bx += (dx / distance) * 8;
+					by += (dy / distance) * 8;
+					b.Bulettdiv.style.left = bx.toString() + "px";
+					b.Bulettdiv.style.top = by.toString() + "px";
+					if (distance < 20) {
+						b.Target.TakeDamage(b.Damage);
+					}
+				} else {
+					b.Bulettdiv.style.left = (bx+20).toString() + "px";
+					b.Bulettdiv.style.top = (by+20).toString() + "px";
+					b.Bulettdiv.style.height = distance.toString() + "px";
 					b.Target.TakeDamage(b.Damage);
 					bulletsToRemove.push(b);
+					let angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90;
+					b.Bulettdiv.style.transformOrigin = "left top";
+					b.Bulettdiv.style.transform = `rotate(${angle}deg)`;
+					b.Bulettdiv.style.opacity = "0";
+					setTimeout(() => {
+						bulletsToRemove.push(b);
+					}, 250);
 				}
 			}
 		});
@@ -154,25 +199,41 @@ function ClearBuletts(): void {
 		gameArea.removeChild(b.Bulettdiv);
 	});
 	blasterbuletts = [];
-	buletts = []; //remove when lose target!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	buletts = [];
 }
 
 function RemoveBlasterBulett(b: Bulett): void {
-	let index: number = blasterbuletts.indexOf(b);
-	if (index == -1) return;
-	blasterbuletts.splice(index, 1);
-	gameArea.removeChild(b.Bulettdiv);
+	if (gameArea.contains(b.Bulettdiv)) {
+		gameArea.removeChild(b.Bulettdiv);
+	}
 }
 
 function RemoveBulett(b: Bulett): void {
 	let index: number = buletts.indexOf(b);
 	if (index == -1) return;
 	buletts.splice(index, 1);
-	setTimeout(() => {
+	if (b.Type == "Blaster") {
+		let blasterindex: number = blasterbuletts.indexOf(b);
+		if (blasterindex == -1) return;
+		blasterbuletts.splice(blasterindex, 1);
 		if (gameArea.contains(b.Bulettdiv)) {
 			gameArea.removeChild(b.Bulettdiv);
 		}
-	}, 700);
+	}
+	if (b.Type == "Shock") {
+		setTimeout(() => {
+			if (gameArea.contains(b.Bulettdiv)) {
+				gameArea.removeChild(b.Bulettdiv);
+			}
+		}, 700);
+	}
+	if (b.Type == "Sniper") {
+		setTimeout(() => {
+			if (gameArea.contains(b.Bulettdiv)) {
+				gameArea.removeChild(b.Bulettdiv);
+			}
+		}, 250);
+	}
 }
 function Bulettspawner(t: Tower): void {
 	let gameAreaRect = gameArea.getBoundingClientRect();
@@ -187,6 +248,7 @@ function Bulettspawner(t: Tower): void {
 		}
 	});
 	if (inrange) {
+		t.LastShot = Date.now()
 		let bulett = new Bulett(t);
 		bulett.Shotfrom = t;
 		bulett.Bulettdiv.style.left = tx - gameAreaRect.left + 20 + "px";
@@ -206,8 +268,7 @@ function Bulettspawner(t: Tower): void {
 					bulett.Bulettdiv.style.height = "800px";
 				});
 			});
-			let timeout: number;
-			timeout = setTimeout(() => {
+			setTimeout(() => {
 				bulett.Bulettdiv.style.opacity = "0";
 			}, 400);
 		}
@@ -232,9 +293,6 @@ cells.forEach((c) => {
 				coins -= newtower.Cost;
 				coinSpan.innerHTML = coins.toString();
 				towers.push(newtower);
-				newtower.Interval = setInterval(() => {
-					Bulettspawner(newtower);
-				}, newtower.Firerate);
 			}
 		}
 	});
