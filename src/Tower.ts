@@ -52,7 +52,7 @@ export class Tower {
 			});
 			this.Towerdiv.innerHTML =
 				"<span>Lvl: " + this.Level.toString() + "</span>";
-			placement.appendChild(this.Towerdiv);
+			this.Placement.appendChild(this.Towerdiv);
 		}
 	}
 

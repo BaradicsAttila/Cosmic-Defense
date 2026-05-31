@@ -31,6 +31,16 @@ body {
 	width: 10%;
 	color: white;
 	font-size: 30px;
+	display: flex;
+}
+
+.coinicon {
+	margin-top: 3px;
+	margin-right: 5px;
+	width: 30px;
+	height: 30px;
+	background-image: url(assets/Coin.png);
+	background-size: contain;
 }
 
 .hartsdiv {

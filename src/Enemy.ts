@@ -75,7 +75,10 @@ export class Enemy {
 	}
 
 	Destroy(): void {
-		document.querySelector(".gameArea")?.removeChild(this.EnemyDiv);
+		let gameArea = document.querySelector(".gameArea");
+		if (gameArea?.contains(this.EnemyDiv)) {
+			gameArea.removeChild(this.EnemyDiv);
+		}
 	}
 
 	Move(): void {

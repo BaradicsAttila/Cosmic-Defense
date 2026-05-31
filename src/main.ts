@@ -14,6 +14,10 @@ let health: number = 3;
 let buildmode: boolean = false;
 let upgrademode: boolean = false;
 let destroymode: boolean = false;
+let iswaverunning: boolean = false;
+let enemysthiswave: number = 0;
+let enemydefeatedthiswave: number = 0;
+let spawnTimeouts: number[] = [];
 
 const startBTN: HTMLDivElement = document.querySelector(
 	".startBTN",
@@ -45,24 +49,44 @@ const cells = document.querySelectorAll(
 ) as NodeListOf<HTMLTableCellElement>;
 const selectableTowers = document.querySelectorAll(
 	".towerselectdiv",
-) as NodeListOf<HTMLTableCellElement>;
+) as NodeListOf<HTMLDivElement>;
 const gameArea: HTMLDivElement = document.querySelector(
 	".gameArea",
 ) as HTMLDivElement;
+const currentwavespan: HTMLSpanElement = document.querySelector(
+	".currentWaveSpan",
+) as HTMLSpanElement;
+const highscoreSpan = document.querySelector(
+	".highscoreSpan",
+) as HTMLSpanElement;
+
+highscoreSpan.innerHTML = localStorage.getItem("record") ?? "0";
 
 startBTN.addEventListener("click", () => {
+	if (startBTN.innerHTML == "Restart") {
+		towers.forEach(t => {
+			t.Demolish()
+		});
+		towers = []
+	}
 	WaveStarted();
 	(document.querySelector(".startportal") as HTMLDivElement).style.opacity =
 		"1";
 	(document.querySelector(".endportal") as HTMLDivElement).style.opacity = "1";
 	startBTN.style.display = "none";
-	startBTN.innerHTML = "Start Next Wave";
 });
 
 function WaveStarted(): void {
 	wave++;
+	currentwavespan.innerHTML = wave.toString();
+	iswaverunning = true;
+	enemydefeatedthiswave = 0;
+	enemysthiswave = Math.floor(23 * 1.2 ** (wave - 1));
 	EnemySpawner();
 	gameInterval = setInterval(() => {
+		if (enemydefeatedthiswave >= enemysthiswave) {
+			WaveOver();
+		}
 		towers.forEach((t) => {
 			let towerRect = t.Towerdiv.getBoundingClientRect();
 			let nowInRange = false;
@@ -165,10 +189,11 @@ function WaveStarted(): void {
 					b.Bulettdiv.style.top = by.toString() + "px";
 					if (distance < 20) {
 						b.Target.TakeDamage(b.Damage);
+						bulletsToRemove.push(b);
 					}
 				} else {
-					b.Bulettdiv.style.left = (bx+20).toString() + "px";
-					b.Bulettdiv.style.top = (by+20).toString() + "px";
+					b.Bulettdiv.style.left = (bx + 20).toString() + "px";
+					b.Bulettdiv.style.top = (by + 20).toString() + "px";
 					b.Bulettdiv.style.height = distance.toString() + "px";
 					b.Target.TakeDamage(b.Damage);
 					bulletsToRemove.push(b);
@@ -184,9 +209,6 @@ function WaveStarted(): void {
 		});
 		bulletsToRemove.forEach((b) => {
 			RemoveBulett(b);
-			if (b.Type == "Blaster") {
-				RemoveBlasterBulett(b);
-			}
 		});
 		if (enemys.length == 0) {
 			ClearBuletts();
@@ -196,16 +218,12 @@ function WaveStarted(): void {
 
 function ClearBuletts(): void {
 	buletts.forEach((b) => {
-		gameArea.removeChild(b.Bulettdiv);
+		if (gameArea.contains(b.Bulettdiv)) {
+			gameArea.removeChild(b.Bulettdiv);
+		}
 	});
 	blasterbuletts = [];
 	buletts = [];
-}
-
-function RemoveBlasterBulett(b: Bulett): void {
-	if (gameArea.contains(b.Bulettdiv)) {
-		gameArea.removeChild(b.Bulettdiv);
-	}
 }
 
 function RemoveBulett(b: Bulett): void {
@@ -248,9 +266,8 @@ function Bulettspawner(t: Tower): void {
 		}
 	});
 	if (inrange) {
-		t.LastShot = Date.now()
+		t.LastShot = Date.now();
 		let bulett = new Bulett(t);
-		bulett.Shotfrom = t;
 		bulett.Bulettdiv.style.left = tx - gameAreaRect.left + 20 + "px";
 		bulett.Bulettdiv.style.top = ty - gameAreaRect.top + "px";
 		gameArea.appendChild(bulett.Bulettdiv);
@@ -329,6 +346,7 @@ function Demolish(t: Tower): void {
 function Killed(e: Enemy): void {
 	let index: number = enemys.indexOf(e);
 	if (index == -1) return;
+	enemydefeatedthiswave++;
 	enemys.splice(index, 1);
 	e.Destroy();
 	coins += Math.floor(e.Reward);
@@ -336,19 +354,22 @@ function Killed(e: Enemy): void {
 }
 
 function EnemySpawner(): void {
-	let amountToSpawn: number = Math.floor(23 * 1.2 ** (wave - 1));
-	for (let i = 0; i < amountToSpawn; i++) {
-		setTimeout(
+	for (let i = 0; i < enemysthiswave; i++) {
+		let id = window.setTimeout(
 			() => {
-				enemys.push(new Enemy((e: Enemy) => Killed(e), wave));
+				if (iswaverunning) {
+					enemys.push(new Enemy((e: Enemy) => Killed(e), wave));
+				}
 			},
 			i * (800 / 1.2 ** (wave - 1)),
 		);
+		spawnTimeouts.push(id);
 	}
 }
 
 function RemoveHart(): void {
 	health--;
+	enemydefeatedthiswave++;
 	(document.querySelector(".hartsdiv") as HTMLDivElement).style.width =
 		(60 * health).toString() + "px";
 	if (health <= 0) {
@@ -356,14 +377,54 @@ function RemoveHart(): void {
 	}
 }
 
-function GameOver(): void {
-	clearInterval(gameInterval);
-	ClearBuletts();
-	towers.forEach((t) => {
-		clearInterval(t.Interval);
-	});
+function WaveOver(): void {
+	if (iswaverunning) {
+		iswaverunning = false;
+		spawnTimeouts.forEach((id) => clearTimeout(id));
+		spawnTimeouts = [];
+		SetRecord();
+		ClearBuletts();
+		towers.forEach((t) => {
+			clearInterval(t.Interval);
+			t.InRange = false;
+		});
+		startBTN.innerHTML = "Start Next Wave";
+		startBTN.style.display = "block";
+		clearInterval(gameInterval);
+	}
 }
 
+function GameOver(): void {
+	if (iswaverunning) {
+		iswaverunning = false
+		spawnTimeouts.forEach((id) => clearTimeout(id));
+		spawnTimeouts = [];
+		clearInterval(gameInterval);
+		ClearBuletts();
+		towers.forEach((t) => {
+			clearInterval(t.Interval);
+		});
+		enemys.forEach((e) => {
+			if (gameArea.contains(e.EnemyDiv)) {
+				gameArea.removeChild(e.EnemyDiv);
+			}
+		});
+		enemys = [];
+		wave = 0;
+		startBTN.innerHTML = "Restart";
+		startBTN.style.display = "block";
+		coins = 10000
+	}
+}
+
+function SetRecord(): void {
+	let record = Number(localStorage.getItem("record"));
+	if (wave > record) {
+		localStorage.setItem("record", wave.toString());
+		(document.querySelector(".highscoreSpan") as HTMLSpanElement).innerHTML =
+			wave.toString();
+	}
+}
 buildmodediv.addEventListener("click", () => {
 	upgrademode = false;
 	upgradediv.style.backgroundColor = "transparent";
