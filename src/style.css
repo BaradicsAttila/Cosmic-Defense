@@ -135,10 +135,16 @@ body {
 }
 
 .Shock {
-	width: 400px;
-	height: 400px;
+	width: 0px;
+	height: 0px;
 	opacity: 0.5;
+	transition:
+		width 0.5s ease,
+		height 0.5s ease,
+		opacity 0.25s ease;
+	border-radius: 50%;
 	background-image: url(assets/BulettShock.gif);
+	transform: translate(-50%, -50%);
 }
 
 .Sniper {

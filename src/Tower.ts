@@ -5,13 +5,12 @@ export class Tower {
 	Stats: number[];
 	Placement: HTMLTableCellElement;
 	Cost: number;
-	Range:number;
+	Range: number;
 	DefaultUpgradeCost: number;
+	Interval: number;
+	Firerate: number;
 	get Damage(): number {
 		return this.Stats[0] * 1.5 ** (this.Level - 1);
-	}
-	get Firerate(): number {
-		return this.Stats[1] / 1.5 ** (this.Level - 1);
 	}
 	get Upgradecost(): number {
 		return this.Stats[3] * 2 ** (this.Level - 1);
@@ -27,10 +26,12 @@ export class Tower {
 		this.Type = type;
 		this.Level = 1;
 		this.Stats = this.GetLevelMultiplier();
+		this.Firerate = this.Stats[1];
 		this.Cost = this.Stats[2];
-		this.Range = this.Stats[4]
+		this.Range = this.Stats[4];
 		this.DefaultUpgradeCost = this.Stats[3];
 		this.Placement = placement;
+		this.Interval = 0;
 		this.Towerdiv = document.createElement("div");
 		if (coinamount >= this.Cost) {
 			this.Towerdiv.classList.add("tower");
@@ -38,13 +39,15 @@ export class Tower {
 			this.Towerdiv.addEventListener("click", () => {
 				if (callbackupgrade) {
 					callbackupgrade(this);
-					this.Towerdiv.innerHTML = "<span>Lvl: " + this.Level.toString()+"</span>";
+					this.Towerdiv.innerHTML =
+						"<span>Lvl: " + this.Level.toString() + "</span>";
 				}
 				if (calbackdemolish) {
 					calbackdemolish(this);
 				}
 			});
-			this.Towerdiv.innerHTML = "<span>Lvl: " + this.Level.toString()+"</span>";
+			this.Towerdiv.innerHTML =
+				"<span>Lvl: " + this.Level.toString() + "</span>";
 			placement.appendChild(this.Towerdiv);
 		}
 	}
@@ -53,13 +56,13 @@ export class Tower {
 		let stats: number[];
 		switch (this.Type) {
 			case "Blaster":
-				stats = [20, 500, 200, 200, 400];
+				stats = [20, 1000, 200, 200, 400];
 				return stats;
 			case "Shock":
-				stats = [10, 1000, 500, 400, 400];
+				stats = [10, 2000, 500, 400, 400];
 				return stats;
 			case "Sniper":
-				stats = [100, 2000, 1000, 800, 1200];
+				stats = [100, 3000, 1000, 800, 1000];
 				return stats;
 
 			default:

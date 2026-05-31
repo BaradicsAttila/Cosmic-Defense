@@ -6,12 +6,10 @@ import { Bulett } from "./Bulett";
 let wave: number = 0;
 let enemys: Enemy[] = [];
 let towers: Tower[] = [];
+let buletts: Bulett[] = [];
 let blasterbuletts: Bulett[] = [];
 let coins: number = 10000;
 let gameInterval: number;
-let blasterInterval: number;
-let shockInterval: number;
-let sniperInterval: number;
 let health: number = 3;
 let buildmode: boolean = false;
 let upgrademode: boolean = false;
@@ -64,29 +62,29 @@ startBTN.addEventListener("click", () => {
 function WaveStarted(): void {
 	wave++;
 	EnemySpawner();
-	blasterInterval = setInterval(() => {
-		Bulettspawner("Blaster");
-	}, 1000);
-
 	gameInterval = setInterval(() => {
+		let enemiesToRemove: Enemy[] = [];
 		enemys.forEach((e) => {
 			e.Move();
 			if (
 				Number(e.EnemyDiv.style.left.replace("px", "")) >=
 				Number(portalLeft.replace("px", ""))
 			) {
-				let index: number = enemys.indexOf(e);
-				enemys.splice(index, 1);
-				e.Destroy();
-				RemoveHart();
+				enemiesToRemove.push(e);
 			}
 		});
-		blasterbuletts.forEach((b) => {
-			const gameAreaRect = gameArea.getBoundingClientRect();
-			const bulletRect = b.Bulettdiv.getBoundingClientRect();
+		enemiesToRemove.forEach((e) => {
+			let index: number = enemys.indexOf(e);
+			enemys.splice(index, 1);
+			e.Destroy();
+			RemoveHart();
+		});
+		let bulletsToRemove: Bulett[] = [];
+		buletts.forEach((b) => {
+			let gameAreaRect = gameArea.getBoundingClientRect();
+			let bulletRect = b.Bulettdiv.getBoundingClientRect();
 			let bx = bulletRect.left - gameAreaRect.left;
 			let by = bulletRect.top - gameAreaRect.top;
-
 			if (!b.Target || !enemys.includes(b.Target)) {
 				let targetable: Enemy[] = [];
 				enemys.forEach((e) => {
@@ -94,9 +92,20 @@ function WaveStarted(): void {
 					let ex = enemyRect.left - gameAreaRect.left;
 					let ey = enemyRect.top - gameAreaRect.top;
 					let distance = Math.sqrt((ex - bx) ** 2 + (ey - by) ** 2);
+					e.Distance = distance;
 					if (distance < b.Range) targetable.push(e);
 				});
-				if (targetable.length > 0) {
+				if (targetable.length > 0 && b.Type == "Shock") {
+					targetable.forEach((t) => {
+						setTimeout(
+							() => {
+								t.TakeDamage(b.Damage);
+							},
+							500 * (t.Distance / b.Range),
+						);
+					});
+				}
+				if (targetable.length > 0 && b.Type != "Shock") {
 					let targeted: Enemy = targetable[0];
 					targetable.forEach((t) => {
 						if (
@@ -109,48 +118,102 @@ function WaveStarted(): void {
 					b.Target = targeted;
 				}
 			}
-
-			if (b.Target) {
+			if (b.Target && b.Type != "Shock") {
 				let tx =
 					b.Target.EnemyDiv.getBoundingClientRect().left -
 					gameAreaRect.left;
 				let ty =
 					b.Target.EnemyDiv.getBoundingClientRect().top - gameAreaRect.top;
-				bx += (tx - bx) / 10;
-				by += (ty - by) / 10;
-				b.Bulettdiv.style.left = bx + "px";
-				b.Bulettdiv.style.top = by + "px";
+				let dx = tx + 40 - bx;
+				let dy = ty + 10 - by;
+				let distance = Math.sqrt(dx ** 2 + dy ** 2);
+				bx += (dx / distance) * 8;
+				by += (dy / distance) * 8;
+				b.Bulettdiv.style.left = bx.toString() + "px";
+				b.Bulettdiv.style.top = by.toString() + "px";
+				if (distance < 20) {
+					b.Target.TakeDamage(b.Damage);
+					bulletsToRemove.push(b);
+				}
 			}
 		});
+		bulletsToRemove.forEach((b) => {
+			RemoveBulett(b);
+			if (b.Type == "Blaster") {
+				RemoveBlasterBulett(b);
+			}
+		});
+		if (enemys.length == 0) {
+			ClearBuletts();
+		}
 	}, 16);
 }
 
-function Bulettspawner(towertype: string) {
-	towers.forEach((t) => {
-		let inrange: boolean = false;
-		let towerRect: DOMRect = t.Towerdiv.getBoundingClientRect();
-
-		let tx: number = towerRect.left;
-		let ty: number = towerRect.top;
-		enemys.forEach((e) => {
-			let enemyRect: DOMRect = e.EnemyDiv.getBoundingClientRect();
-			let ex: number = enemyRect.left;
-			let ey: number = enemyRect.top;
-			let distance: number = Math.sqrt((ex - tx) ** 2 + (ey - ty) ** 2);
-			if (distance < t.Range) {
-				inrange = true;
-			}
-		});
-		if (t.Type == towertype && inrange) {
-			let bulett: Bulett = new Bulett(t.Type, t.Damage, t.Range);
-			bulett.Bulettdiv.style.left = (tx + 20).toString() + "px";
-			bulett.Bulettdiv.style.top = (ty - 80).toString() + "px";
-			gameArea.appendChild(bulett.Bulettdiv);
-			blasterbuletts.push(bulett);
-		}
+function ClearBuletts(): void {
+	buletts.forEach((b) => {
+		gameArea.removeChild(b.Bulettdiv);
 	});
+	blasterbuletts = [];
+	buletts = []; //remove when lose target!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
+function RemoveBlasterBulett(b: Bulett): void {
+	let index: number = blasterbuletts.indexOf(b);
+	if (index == -1) return;
+	blasterbuletts.splice(index, 1);
+	gameArea.removeChild(b.Bulettdiv);
+}
+
+function RemoveBulett(b: Bulett): void {
+	let index: number = buletts.indexOf(b);
+	if (index == -1) return;
+	buletts.splice(index, 1);
+	setTimeout(() => {
+		if (gameArea.contains(b.Bulettdiv)) {
+			gameArea.removeChild(b.Bulettdiv);
+		}
+	}, 700);
+}
+function Bulettspawner(t: Tower): void {
+	let gameAreaRect = gameArea.getBoundingClientRect();
+	let towerRect = t.Towerdiv.getBoundingClientRect();
+	let tx = towerRect.left;
+	let ty = towerRect.top;
+	let inrange = false;
+	enemys.forEach((e) => {
+		let er = e.EnemyDiv.getBoundingClientRect();
+		if (Math.sqrt((er.left - tx) ** 2 + (er.top - ty) ** 2) < t.Range) {
+			inrange = true;
+		}
+	});
+	if (inrange) {
+		let bulett = new Bulett(t);
+		bulett.Shotfrom = t;
+		bulett.Bulettdiv.style.left = tx - gameAreaRect.left + 20 + "px";
+		bulett.Bulettdiv.style.top = ty - gameAreaRect.top + "px";
+		gameArea.appendChild(bulett.Bulettdiv);
+		if (t.Type == "Blaster") {
+			blasterbuletts.push(bulett);
+		}
+		if (t.Type == "Shock") {
+			bulett.Bulettdiv.style.left =
+				(tx - gameAreaRect.left + 50).toString() + "px";
+			bulett.Bulettdiv.style.top =
+				(ty - gameAreaRect.top + 50).toString() + "px";
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					bulett.Bulettdiv.style.width = "800px";
+					bulett.Bulettdiv.style.height = "800px";
+				});
+			});
+			let timeout: number;
+			timeout = setTimeout(() => {
+				bulett.Bulettdiv.style.opacity = "0";
+			}, 400);
+		}
+		buletts.push(bulett);
+	}
+}
 cells.forEach((c) => {
 	c.addEventListener("click", () => {
 		if (buildmode && !c.classList.contains("occupied")) {
@@ -169,13 +232,16 @@ cells.forEach((c) => {
 				coins -= newtower.Cost;
 				coinSpan.innerHTML = coins.toString();
 				towers.push(newtower);
+				newtower.Interval = setInterval(() => {
+					Bulettspawner(newtower);
+				}, newtower.Firerate);
 			}
 		}
 	});
 });
 
 function LevelUp(t: Tower): void {
-	const upgradeCost = t.Upgradecost;
+	let upgradeCost = t.Upgradecost;
 	if (upgrademode && upgradeCost <= coins) {
 		coins -= upgradeCost;
 		t.Level++;
@@ -197,12 +263,14 @@ function Demolish(t: Tower): void {
 		if (index !== -1) {
 			towers.splice(index, 1);
 		}
+		clearInterval(t.Interval);
 		t.Demolish();
 	}
 }
 
 function Killed(e: Enemy): void {
 	let index: number = enemys.indexOf(e);
+	if (index == -1) return;
 	enemys.splice(index, 1);
 	e.Destroy();
 	coins += Math.floor(e.Reward);
@@ -232,6 +300,10 @@ function RemoveHart(): void {
 
 function GameOver(): void {
 	clearInterval(gameInterval);
+	ClearBuletts();
+	towers.forEach((t) => {
+		clearInterval(t.Interval);
+	});
 }
 
 buildmodediv.addEventListener("click", () => {
