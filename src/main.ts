@@ -72,12 +72,15 @@ startBTN.addEventListener("click", () => {
 		(document.querySelector(".hartsdiv") as HTMLDivElement).style.width =
 			"180px";
 		towers = [];
+		startBTN.innerHTML = "Start First Wave";
+	} else {
+		WaveStarted();
+		(document.querySelector(".startportal") as HTMLDivElement).style.opacity =
+			"1";
+		(document.querySelector(".endportal") as HTMLDivElement).style.opacity =
+			"1";
+		startBTN.style.display = "none";
 	}
-	WaveStarted();
-	(document.querySelector(".startportal") as HTMLDivElement).style.opacity =
-		"1";
-	(document.querySelector(".endportal") as HTMLDivElement).style.opacity = "1";
-	startBTN.style.display = "none";
 });
 
 function WaveStarted(): void {
