@@ -82,33 +82,44 @@ function WaveStarted(): void {
 			}
 		});
 		blasterbuletts.forEach((b) => {
-			let bx: number = parseInt(b.Bulettdiv.style.left);
-			let by: number = parseInt(b.Bulettdiv.style.top);
-			let targetable: Enemy[] = [];
-			enemys.forEach((e) => {
-				let ex: number = parseInt(e.EnemyDiv.style.left);
-				let ey = parseInt(getComputedStyle(e.EnemyDiv).top);
-				console.log(by);
-				let distance: number = Math.sqrt((ex - bx) ** 2 + (ey - by) ** 2);
-				console.log(distance);
-				if (distance < b.Range) {
-					targetable.push(e);
-				}
-			});
-			if (targetable.length > 0) {
-				let targeted: Enemy = targetable[0];
-				targetable.forEach((t) => {
-					if (
-						parseInt(targeted.EnemyDiv.style.left) <
-						parseInt(t.EnemyDiv.style.left)
-					) {
-						targeted = t;
-					}
+			const gameAreaRect = gameArea.getBoundingClientRect();
+			const bulletRect = b.Bulettdiv.getBoundingClientRect();
+			let bx = bulletRect.left - gameAreaRect.left;
+			let by = bulletRect.top - gameAreaRect.top;
+
+			if (!b.Target || !enemys.includes(b.Target)) {
+				let targetable: Enemy[] = [];
+				enemys.forEach((e) => {
+					const enemyRect = e.EnemyDiv.getBoundingClientRect();
+					let ex = enemyRect.left - gameAreaRect.left;
+					let ey = enemyRect.top - gameAreaRect.top;
+					let distance = Math.sqrt((ex - bx) ** 2 + (ey - by) ** 2);
+					if (distance < b.Range) targetable.push(e);
 				});
-				let tx: number = parseInt(targeted.EnemyDiv.style.left);
-				let ty: number = parseInt(targeted.EnemyDiv.style.bottom);
-				b.Bulettdiv.style.left = (Math.abs(tx - bx) / 10).toString() + "px";
-				b.Bulettdiv.style.bottom = ((ty - by) ** 2 / 10).toString() + "px";
+				if (targetable.length > 0) {
+					let targeted: Enemy = targetable[0];
+					targetable.forEach((t) => {
+						if (
+							targeted.EnemyDiv.getBoundingClientRect().left <
+							t.EnemyDiv.getBoundingClientRect().left
+						) {
+							targeted = t;
+						}
+					});
+					b.Target = targeted;
+				}
+			}
+
+			if (b.Target) {
+				let tx =
+					b.Target.EnemyDiv.getBoundingClientRect().left -
+					gameAreaRect.left;
+				let ty =
+					b.Target.EnemyDiv.getBoundingClientRect().top - gameAreaRect.top;
+				bx += (tx - bx) / 10;
+				by += (ty - by) / 10;
+				b.Bulettdiv.style.left = bx + "px";
+				b.Bulettdiv.style.top = by + "px";
 			}
 		});
 	}, 16);
@@ -118,6 +129,7 @@ function Bulettspawner(towertype: string) {
 	towers.forEach((t) => {
 		let inrange: boolean = false;
 		let towerRect: DOMRect = t.Towerdiv.getBoundingClientRect();
+
 		let tx: number = towerRect.left;
 		let ty: number = towerRect.top;
 		enemys.forEach((e) => {

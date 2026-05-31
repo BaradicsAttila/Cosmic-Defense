@@ -53,7 +53,7 @@ export class Tower {
 		let stats: number[];
 		switch (this.Type) {
 			case "Blaster":
-				stats = [20, 500, 200, 200, 600];
+				stats = [20, 500, 200, 200, 400];
 				return stats;
 			case "Shock":
 				stats = [10, 1000, 500, 400, 400];
