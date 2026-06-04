@@ -59,23 +59,20 @@ const currentwavespan: HTMLSpanElement = document.querySelector(
 const highscoreSpan = document.querySelector(
 	".highscoreSpan",
 ) as HTMLSpanElement;
+const gameoverdiv: HTMLDivElement = document.querySelector(
+	".GameOver",
+) as HTMLDivElement;
+const defeatedspan: HTMLSpanElement = document.querySelector(
+	".defeatedspan",
+) as HTMLSpanElement;
 
 highscoreSpan.innerHTML = localStorage.getItem("record") ?? "0";
 
 startBTN.addEventListener("click", () => {
 	if (startBTN.innerHTML == "Restart") {
-		towers.forEach((t) => {
-			t.Demolish();
-		});
+		gameoverdiv.style.display = "none";
 		GameEnded = false;
-		coins = 10000;
-		coinSpan.innerHTML = coins.toString();
-		health = 3;
-		(document.querySelector(".hartsdiv") as HTMLDivElement).style.width =
-			"180px";
-		towers = [];
 		startBTN.innerHTML = "Start First Wave";
-		currentwavespan.innerHTML = wave.toString()
 	} else {
 		WaveStarted();
 		(document.querySelector(".startportal") as HTMLDivElement).style.opacity =
@@ -394,6 +391,23 @@ function WaveOver(): void {
 
 function GameOver(): void {
 	if (iswaverunning) {
+		defeatedspan.innerHTML = (wave - 1).toString();
+		wave = 0;
+		towers.forEach((t) => {
+			t.Demolish();
+		});
+		currentwavespan.innerHTML = wave.toString();
+		(document.querySelector(".startportal") as HTMLDivElement).style.opacity =
+			"0";
+		(document.querySelector(".endportal") as HTMLDivElement).style.opacity =
+			"0";
+		coins = 10000;
+		coinSpan.innerHTML = coins.toString();
+		health = 3;
+		(document.querySelector(".hartsdiv") as HTMLDivElement).style.width =
+			"180px";
+		towers = [];
+		gameoverdiv.style.display = "block";
 		GameEnded = true;
 		iswaverunning = false;
 		spawnTimeouts.forEach((id) => clearTimeout(id));
@@ -409,7 +423,6 @@ function GameOver(): void {
 			}
 		});
 		enemys = [];
-		wave = 0;
 		startBTN.innerHTML = "Restart";
 		startBTN.style.display = "block";
 		upgrademode = false;

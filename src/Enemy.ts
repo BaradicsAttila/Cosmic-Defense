@@ -42,25 +42,25 @@ export class Enemy {
 			availableTypes[Math.floor(Math.random() * availableTypes.length)];
 
 		if (this.Type === "Red") {
-			this.Speed = 1 * 1.1 ** (this.Wave - 1);
-			this.Hp = 200 * 1.3 ** (this.Wave - 1);
-			this.MaxHp = 200 * 1.3 ** (this.Wave - 1);
-			this.Reward = 300 * 1.1 ** (this.Wave - 1);
+			this.Speed = 1 * 1.03 ** (this.Wave - 1);
+			this.Hp = 200 * 1.2 ** (this.Wave - 1);
+			this.MaxHp = 200 * 1.2 ** (this.Wave - 1);
+			this.Reward = 300 * 1.3 ** (this.Wave - 1);
 		} else if (this.Type === "Yellow") {
-			this.Speed = 2 * 1.1 ** (this.Wave - 1);
-			this.Hp = 50 * 1.3 ** (this.Wave - 1);
-			this.MaxHp = 50 * 1.3 ** (this.Wave - 1);
-			this.Reward = 200 * 1.1 ** (this.Wave - 1);
+			this.Speed = 2 * 1.03 ** (this.Wave - 1);
+			this.Hp = 50 * 1.2 ** (this.Wave - 1);
+			this.MaxHp = 50 * 1.2 ** (this.Wave - 1);
+			this.Reward = 200 * 1.3 ** (this.Wave - 1);
 		} else if (this.Type === "Green") {
-			this.Speed = 0.5 * 1.1 ** (this.Wave - 1);
-			this.Hp = 200 * 1.3 ** (this.Wave - 1);
-			this.MaxHp = 200 * 1.3 ** (this.Wave - 1);
-			this.Reward = 150 * 1.1 ** (this.Wave - 1);
+			this.Speed = 0.5 * 1.03 ** (this.Wave - 1);
+			this.Hp = 200 * 1.2 ** (this.Wave - 1);
+			this.MaxHp = 200 * 1.2 ** (this.Wave - 1);
+			this.Reward = 150 * 1.3 ** (this.Wave - 1);
 		} else {
-			this.Speed = 1 * 1.1 ** (this.Wave - 1);
-			this.Hp = 100 * 1.3 ** (this.Wave - 1);
-			this.MaxHp = 100 * 1.3 ** (this.Wave - 1);
-			this.Reward = 100 * 1.1 ** (this.Wave - 1);
+			this.Speed = 1 * 1.03 ** (this.Wave - 1);
+			this.Hp = 100 * 1.2 ** (this.Wave - 1);
+			this.MaxHp = 100 * 1.2 ** (this.Wave - 1);
+			this.Reward = 100 * 1.3 ** (this.Wave - 1);
 		}
 	}
 

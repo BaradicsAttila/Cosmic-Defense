@@ -17,6 +17,50 @@ body {
 	cursor: default;
 }
 
+.GameOver {
+	position: absolute;
+	text-align: center;
+	left: 50%;
+	translate: -50%;
+	width: 500px;
+	height: 200px;
+	color: white;
+	color: white;
+	padding: 20px;
+	top: 20%;
+	display: none;
+}
+
+.GameOver h1 {
+	font-size: 90px;
+	margin: 0;
+}
+
+.GameOver p {
+	font-size: 30px;
+	margin-top: 10px;
+}
+
+.GameOver::before {
+	content: "";
+	opacity: 0.2;
+	background-color: white;
+	inset: 0;
+	position: absolute;
+	border-radius: 10px;
+}
+
+.constructionsdiv::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	margin-top: -10px;
+	background-image: url(assets/ConstuctionStripes.jpg);
+	background-size: contain;
+	opacity: 0.3;
+	z-index: -1;
+}
+
 .wavediv {
 	height: 100px;
 	width: 20%;

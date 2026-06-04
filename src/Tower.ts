@@ -57,16 +57,17 @@ export class Tower {
 	}
 
 	GetLevelMultiplier(): number[] {
+		//damage firerate cost upgradecost range
 		let stats: number[];
 		switch (this.Type) {
 			case "Blaster":
 				stats = [20, 1000, 200, 200, 400];
 				return stats;
 			case "Shock":
-				stats = [25, 2000, 500, 400, 400];
+				stats = [40, 2000, 500, 400, 400];
 				return stats;
 			case "Sniper":
-				stats = [100, 3000, 1000, 800, 1000];
+				stats = [100, 2000, 1000, 800, 1000];
 				return stats;
 
 			default:
