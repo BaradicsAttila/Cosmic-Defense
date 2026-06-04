@@ -189,8 +189,8 @@ function WaveStarted(): void {
 				let dy = ty + 10 - by;
 				let distance = Math.sqrt(dx ** 2 + dy ** 2);
 				if (b.Type == "Blaster") {
-					bx += (dx / distance) * 8;
-					by += (dy / distance) * 8;
+					bx += (dx / distance) * 15;
+					by += (dy / distance) * 15;
 					b.Bulettdiv.style.left = bx.toString() + "px";
 					b.Bulettdiv.style.top = by.toString() + "px";
 					if (distance < 20) {
@@ -303,6 +303,7 @@ cells.forEach((c) => {
 			if (coins >= newtower.Cost) {
 				c.classList.add("occupied");
 				coins -= newtower.Cost;
+				coins = Math.floor(coins);
 				coinSpan.innerHTML = coins.toString();
 				towers.push(newtower);
 			}
@@ -314,6 +315,7 @@ function LevelUp(t: Tower): void {
 	let upgradeCost = t.Upgradecost;
 	if (upgrademode && upgradeCost <= coins) {
 		coins -= upgradeCost;
+		coins = Math.floor(coins);
 		t.Level++;
 
 		coinSpan.innerHTML = coins.toString();
@@ -328,6 +330,7 @@ function Demolish(t: Tower): void {
 				t.DefaultUpgradeCost * 2 ** (t.Level - 1) - t.DefaultUpgradeCost;
 		}
 		coins += moneyback;
+		coins = Math.floor(coins);
 		coinSpan.innerHTML = coins.toString();
 		const index = towers.indexOf(t);
 		if (index !== -1) {
@@ -345,6 +348,7 @@ function Killed(e: Enemy): void {
 	enemys.splice(index, 1);
 	e.Destroy();
 	coins += Math.floor(e.Reward);
+	coins = Math.floor(coins);
 	coinSpan.innerHTML = coins.toString();
 }
 

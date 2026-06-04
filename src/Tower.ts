@@ -12,10 +12,10 @@ export class Tower {
 	InRange : boolean;
 	LastShot : number;
 	get Damage(): number {
-		return this.Stats[0] * 1.5 ** (this.Level - 1);
+		return this.Stats[0] * 1.6 ** (this.Level - 1);
 	}
 	get Upgradecost(): number {
-		return this.Stats[3] * 2 ** (this.Level - 1);
+		return this.Stats[3] * 1.55 ** (this.Level - 1);
 	}
 
 	constructor(
@@ -57,17 +57,17 @@ export class Tower {
 	}
 
 	GetLevelMultiplier(): number[] {
-		//damage firerate cost upgradecost range
+		//damage, firerate, cost, upgradecost, range
 		let stats: number[];
 		switch (this.Type) {
 			case "Blaster":
-				stats = [20, 1000, 200, 200, 400];
+				stats = [20, 1000, 400, 300, 400];
 				return stats;
 			case "Shock":
-				stats = [40, 2000, 500, 400, 400];
+				stats = [40, 2000, 1000, 700, 400];
 				return stats;
 			case "Sniper":
-				stats = [100, 2000, 1000, 800, 1000];
+				stats = [100, 2000, 2000, 1200, 1000];
 				return stats;
 
 			default:
