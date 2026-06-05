@@ -22,6 +22,9 @@ let GameEnded: boolean = false;
 const startBTN: HTMLButtonElement = document.querySelector(
 	".startBTN",
 ) as HTMLButtonElement;
+const okBTN: HTMLButtonElement = document.querySelector(
+	".ok",
+) as HTMLButtonElement;
 const coinSpan: HTMLSpanElement = document.querySelector(
 	".coinSpan",
 ) as HTMLSpanElement;
@@ -62,11 +65,19 @@ const highscoreSpan = document.querySelector(
 const gameoverdiv: HTMLDivElement = document.querySelector(
 	".GameOver",
 ) as HTMLDivElement;
+const instructions: HTMLDivElement = document.querySelector(
+	".instructions",
+) as HTMLDivElement;
 const defeatedspan: HTMLSpanElement = document.querySelector(
 	".defeatedspan",
 ) as HTMLSpanElement;
 
 highscoreSpan.innerHTML = localStorage.getItem("record") ?? "0";
+
+okBTN.addEventListener("click", () => {
+	instructions.style.display = "none";
+	startBTN.style.display = "block";
+});
 
 startBTN.addEventListener("click", () => {
 	if (startBTN.innerHTML == "Restart") {
@@ -88,7 +99,7 @@ function WaveStarted(): void {
 	currentwavespan.innerHTML = wave.toString();
 	iswaverunning = true;
 	enemydefeatedthiswave = 0;
-	enemysthiswave = Math.floor(23 * 1.2 ** (wave - 1));
+	enemysthiswave = Math.floor(24 * 1.2 ** (wave - 1));
 	EnemySpawner();
 	gameInterval = setInterval(() => {
 		if (enemydefeatedthiswave >= enemysthiswave) {
@@ -126,7 +137,7 @@ function WaveStarted(): void {
 			e.Move();
 			if (
 				Number(e.EnemyDiv.style.left.replace("px", "")) >=
-				Number(portalLeft.replace("px", ""))
+				Number(portalLeft.replace("px", ""))+50
 			) {
 				enemiesToRemove.push(e);
 			}
@@ -451,62 +462,66 @@ function SetRecord(): void {
 	}
 }
 buildmodediv.addEventListener("click", () => {
-	upgrademode = false;
-	upgradediv.style.backgroundColor = "";
-	destroymode = false;
-	destroydiv.style.backgroundColor = "";
-	if (buildmode || GameEnded) {
-		buildmode = false;
-		towrselecterdiv.style.display = "none";
-		constructiondiv.style.opacity = "0";
-		cells.forEach((c) => {
-			c.style.border = "2px transparent solid";
-		});
-	} else {
-		buildmode = true;
-		towrselecterdiv.style.display = "flex";
-		constructiondiv.style.opacity = "1";
-		cells.forEach((c) => {
-			c.style.border = "2px orange solid";
-		});
+	if (instructions.style.display == "none") {
+		upgrademode = false;
+		upgradediv.style.backgroundColor = "";
+		destroymode = false;
+		destroydiv.style.backgroundColor = "";
+		if (buildmode || GameEnded) {
+			buildmode = false;
+			towrselecterdiv.style.display = "none";
+			constructiondiv.style.opacity = "0";
+			cells.forEach((c) => {
+				c.style.border = "2px transparent solid";
+			});
+		} else {
+			buildmode = true;
+			towrselecterdiv.style.display = "flex";
+			constructiondiv.style.opacity = "1";
+			cells.forEach((c) => {
+				c.style.border = "2px orange solid";
+			});
+		}
 	}
 });
 
 upgradediv.addEventListener("click", () => {
-	buildmode = false;
-	towrselecterdiv.style.display = "none";
-	constructiondiv.style.opacity = "0";
-	destroymode = false;
-	destroydiv.style.backgroundColor = "";
-	cells.forEach((c) => {
-		c.style.border = "2px transparent solid";
-	});
-
-	if (upgrademode || GameEnded) {
-		upgrademode = false;
-		upgradediv.style.backgroundColor = "";
-	} else {
-		upgrademode = true;
-		upgradediv.style.backgroundColor = "green";
+	if (instructions.style.display == "none") {
+		buildmode = false;
+		towrselecterdiv.style.display = "none";
+		constructiondiv.style.opacity = "0";
+		destroymode = false;
+		destroydiv.style.backgroundColor = "";
+		cells.forEach((c) => {
+			c.style.border = "2px transparent solid";
+		});
+		if (upgrademode || GameEnded) {
+			upgrademode = false;
+			upgradediv.style.backgroundColor = "";
+		} else {
+			upgrademode = true;
+			upgradediv.style.backgroundColor = "green";
+		}
 	}
 });
 
 destroydiv.addEventListener("click", () => {
-	buildmode = false;
-	towrselecterdiv.style.display = "none";
-	constructiondiv.style.opacity = "0";
-	upgrademode = false;
-	upgradediv.style.backgroundColor = "";
-	cells.forEach((c) => {
-		c.style.border = "2px transparent solid";
-	});
-
-	if (destroymode || GameEnded) {
-		destroymode = false;
-		destroydiv.style.backgroundColor = "";
-	} else {
-		destroymode = true;
-		destroydiv.style.backgroundColor = "orange";
+	if (instructions.style.display == "none") {
+		buildmode = false;
+		towrselecterdiv.style.display = "none";
+		constructiondiv.style.opacity = "0";
+		upgrademode = false;
+		upgradediv.style.backgroundColor = "";
+		cells.forEach((c) => {
+			c.style.border = "2px transparent solid";
+		});
+		if (destroymode || GameEnded) {
+			destroymode = false;
+			destroydiv.style.backgroundColor = "";
+		} else {
+			destroymode = true;
+			destroydiv.style.backgroundColor = "orange";
+		}
 	}
 });
 

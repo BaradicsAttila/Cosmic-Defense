@@ -8,11 +8,38 @@
 		<script type="module" src="/src/main.ts" defer></script>
 	</head>
 	<body>
+		<div class="instructions">
+			<h1>Instructions</h1>
+			<p>-Ajánlot 1920x1080p felbontásban játszani.</p>
+			<p>-A játék egy tower defense koncepcióra épül.</p>
+			<p>-A játékos feladata megakadályozni hogy az ellenségek eljussanak a csillagig.</p>
+			<p>
+				-Jobb felső sarokban takálható balról jobbra a torony lerombolása,
+				torony fejlesztése, új torony építése gombok.
+			</p>
+			<p>-Minden lerakott torony alatt lehet látni a szintjét illetve hogy mennyibe kerül fejleszteni. Minden fejlesztéstől a tornyunk többet fog sebezni</p>
+			<p>
+				-A Start First Wave gombra kattintva el is indul a játék. Ha az
+				összes ellenséget megsemmisítettük akkor elindíthatjuk a következő
+				hullámot.
+			</p>
+			<p>
+				-A játék előrehaldtával egyre reősebb fajta ellenségekkel
+				találkozhatunk amelyeknek különböző tulajdonságaik vannak. A szimpla
+				ellenségek is folyamatosan erősödnek.
+			</p>
+			<p>-A játék akkor ér véget ha 3 ellenség eljut a híd végén található csillaghoz.</p>
+			<p>-Sok sikert a játékhoz</p>
+			<button class="ok">OK</button>
+		</div>
 		<div class="topbar">
 			<div class="wavediv">Wave: <span class="currentWaveSpan">0</span></div>
 			<div class="wavediv">Record: <span class="highscoreSpan">0</span></div>
 			<div class="hartsdiv"></div>
-			<div class="coindiv"><div class="coinicon"></div><span class="coinSpan">0</span></div>
+			<div class="coindiv">
+				<div class="coinicon"></div>
+				<span class="coinSpan">0</span>
+			</div>
 			<div class="destroydiv"></div>
 			<div class="upgradediv"></div>
 			<div class="buildmodediv"></div>
@@ -21,19 +48,25 @@
 		<div class="startportal" style="opacity: 0"></div>
 		<div class="endportal" style="opacity: 0"></div>
 		<div class="constructionsdiv" style="opacity: 0">Build Mode</div>
-		<div class="GameOver"><h1>Game Over</h1> <p>Defeated <span class="defeatedspan"></span> waves</p></div>
+		<div class="GameOver">
+			<h1>Game Over</h1>
+			<p>Defeated <span class="defeatedspan"></span> waves</p>
+		</div>
 		<div class="towerSeletor">
 			<div class="towerselectdiv blasterdiv selelectedturet">
 				<div></div>
 				<p>Blaster</p>
+				<p>Cost: 400</p>
 			</div>
 			<div class="towerselectdiv shockdiv">
 				<div></div>
 				<p>Shock</p>
+				<p>Cost: 1000</p>
 			</div>
 			<div class="towerselectdiv sniperdiv">
 				<div></div>
 				<p>Sniper</p>
+				<p>Cost: 2000</p>
 			</div>
 		</div>
 		<button class="startBTN">Start First Wave</button>
@@ -47,7 +80,7 @@
 				<td></td>
 				<td></td>
 				<td></td>
-				<td></td>
+				<td style="font-size: 12px; bottom: -3px;"></td>
 				<td></td>
 			</tr>
 			<tr>

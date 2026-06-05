@@ -9,13 +9,13 @@ export class Tower {
 	DefaultUpgradeCost: number;
 	Interval: number;
 	Firerate: number;
-	InRange : boolean;
-	LastShot : number;
+	InRange: boolean;
+	LastShot: number;
 	get Damage(): number {
 		return this.Stats[0] * 1.6 ** (this.Level - 1);
 	}
 	get Upgradecost(): number {
-		return this.Stats[3] * 1.55 ** (this.Level - 1);
+		return Math.floor(this.Stats[3] * 1.55 ** (this.Level - 1));
 	}
 
 	constructor(
@@ -44,14 +44,24 @@ export class Tower {
 				if (callbackupgrade) {
 					callbackupgrade(this);
 					this.Towerdiv.innerHTML =
-						"<span>Lvl: " + this.Level.toString() + "</span>";
+						"<span>Lvl: " +
+						this.Level.toString() +
+						"</span>" +
+						"<span style='font-size: 12px; bottom: -10px;'>" +
+						this.Upgradecost.toString() +
+						"</span>";
 				}
 				if (calbackdemolish) {
 					calbackdemolish(this);
 				}
 			});
 			this.Towerdiv.innerHTML =
-				"<span>Lvl: " + this.Level.toString() + "</span>";
+				"<span>Lvl: " +
+				this.Level.toString() +
+				"</span>" +
+				"<span style='font-size: 12px; bottom: -10px;''>" +
+				this.Upgradecost.toString() +
+				"</span>";
 			this.Placement.appendChild(this.Towerdiv);
 		}
 	}
